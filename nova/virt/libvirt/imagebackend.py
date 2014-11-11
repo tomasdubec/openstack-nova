@@ -426,6 +426,9 @@ class Lvm(Image):
     def __init__(self, instance=None, disk_name=None, path=None):
         super(Lvm, self).__init__("block", "raw", is_block_dev=True)
 
+        self.instance = instance
+        self.disk_name = disk_name
+
         if path:
             info = libvirt_utils.logical_volume_info(path)
             self.vg = info['VG']
@@ -472,6 +475,18 @@ class Lvm(Image):
                                            size, sparse=self.sparse)
             with self.remove_volume_on_error(self.path):
                 prepare_template(target=self.path, *args, **kwargs)
+
+            try:
+                os_type = self.instance['os_type'] \
+                    if self.instance['os_type'] else "default"
+            except Exception:
+                os_type = "default"
+
+            disk_name = self.disk_name
+            if disk_name == None:
+                disk_name = "ephemeral0"
+            disk.mkfs(os_type, disk_name, self.path, True)
+
         else:
             if not os.path.exists(base):
                 prepare_template(target=base, max_size=size, *args, **kwargs)

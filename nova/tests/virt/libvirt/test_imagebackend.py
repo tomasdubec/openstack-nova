@@ -19,6 +19,7 @@ import tempfile
 
 import fixtures
 import mock
+import mox
 from oslo.config import cfg
 
 import inspect
@@ -30,6 +31,7 @@ from nova import test
 from nova.tests import fake_processutils
 from nova.tests.virt.libvirt import fake_libvirt_utils
 from nova import utils
+from nova.virt.disk import api as disk
 from nova.virt.libvirt import imagebackend
 
 CONF = cfg.CONF
@@ -560,6 +562,11 @@ class LvmTestCase(_ImageTestCase, test.NoDBTestCase):
         fn = self.prepare_mocks()
         self.libvirt_utils.create_lvm_image(self.VG, self.LV,
                                             self.SIZE, sparse=sparse)
+        self.mox.StubOutWithMock(disk, 'mkfs')
+        disk.mkfs(mox.IgnoreArg(),
+                  mox.IgnoreArg(),
+                  mox.IgnoreArg(),
+                  mox.IgnoreArg()).AndReturn(True)
         fn(target=self.PATH, ephemeral_size=None)
         self.mox.ReplayAll()
 
