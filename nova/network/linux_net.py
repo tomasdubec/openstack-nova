@@ -794,11 +794,7 @@ def floating_ebtables_rules(fixed_ip, network):
 def floating_forward_rules(floating_ip, fixed_ip, device):
     rules = []
     rule = '-s %s -j SNAT --to %s' % (fixed_ip, floating_ip)
-    if device:
-        rules.append(('float-snat', rule + ' -d %s' % fixed_ip))
-        rules.append(('float-snat', rule + ' -o %s' % device))
-    else:
-        rules.append(('float-snat', rule))
+    rules.append(('float-snat', rule))
     rules.append(
             ('PREROUTING', '-d %s -j DNAT --to %s' % (floating_ip, fixed_ip)))
     rules.append(
