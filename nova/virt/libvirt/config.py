@@ -1161,6 +1161,7 @@ class LibvirtConfigGuest(LibvirtConfigObject):
         self.os_smbios = None
         self.os_mach_type = None
         self.devices = []
+        self.use_hugepages = False
 
     def _format_basic_props(self, root):
         root.append(self._text_node("uuid", self.uuid))
@@ -1227,6 +1228,12 @@ class LibvirtConfigGuest(LibvirtConfigObject):
             devices.append(dev.format_dom())
         root.append(devices)
 
+    def _format_memorybacking(self, root):
+        if self.use_hugepages:
+            memorybacking = etree.Element("memoryBacking")
+            memorybacking.append(etree.Element("hugepages"))
+            root.append(memorybacking)
+
     def format_dom(self):
         root = super(LibvirtConfigGuest, self).format_dom()
 
@@ -1238,6 +1245,7 @@ class LibvirtConfigGuest(LibvirtConfigObject):
             root.append(self.sysinfo.format_dom())
 
         self._format_os(root)
+        self._format_memorybacking(root)
         self._format_features(root)
         self._format_cputune(root)
 
